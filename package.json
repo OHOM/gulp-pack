@@ -1,0 +1,30 @@
+{
+  "name": "gulp-pack",
+  "version": "1.0.1",
+  "description": "gulp pack.",
+  "main": "index.js",
+  "dependencies": {
+    "gulp": "~3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-if": "^2.0.2",
+    "gulp-javascript-obfuscator": "^1.1.6",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-sequence": "^1.0.0",
+    "gulp-uglify": "^3.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "install": "npm install gulp -g -save && npm install gulp-if -g -save && npm install gulp-concat -g -save && npm install gulp-htmlmin -g -save && npm install gulp-minify-css -g -save && npm install gulp-uglify -g -save && npm install gulp-sequence -g -save && npm install gulp-javascript-obfuscator -g -save",
+    "link": "npm link gulp && npm link gulp-if && npm link gulp-concat && npm link gulp-htmlmin && npm link gulp-minify-css && npm link gulp-uglify && npm link gulp-sequence && npm link gulp-javascript-obfuscator"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OHOM/gulp-pack"
+  },
+  "keywords": [
+    "js gulp pack"
+  ],
+  "author": "ohom",
+  "license": "MIT"
+}
