@@ -6,9 +6,9 @@
  npm install gulp-htmlmin -g
  npm install gulp-minify-css -g
  npm install gulp-uglify -g
- npm install gulp-sequence -g
+ npm install gulp4-run-sequence -g
  npm install gulp-javascript-obfuscator -g
- npm install vinyl-sourcemaps-apply -g
+ npm install minimist -g
 
  npm link gulp
  npm link gulp-if
@@ -16,14 +16,25 @@
  npm link gulp-htmlmin
  npm link gulp-minify-css
  npm link gulp-uglify
- npm link gulp-sequence
+ npm link gulp4-run-sequence
  npm link gulp-javascript-obfuscator
+ npm link minimist
 
  使用：
     npm run install -verbose
     npm run link
 
  */
+
+
+var knownOptions = {
+    string: 'env',
+    default: { env: process.env.NODE_ENV || 'production' }
+};
+
+var minimist = require('minimist');
+var options = minimist(process.argv.slice(2), knownOptions);
+
 
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
@@ -41,13 +52,23 @@ var concat = require("gulp-concat");
 // 压缩 html css js
 // var minifyHtml = require("gulp-minify-html"); // 退休
 var htmlmin = require('gulp-htmlmin'); // 推荐
+var htmlminConfig = {
+    removeComments: true,//清除HTML注释
+    collapseWhitespace: true,//压缩HTML
+    collapseBooleanAttributes: true,//省略布尔属性的值 <input checked="true"/> ==> <input />
+    removeEmptyAttributes: true,//删除所有空格作属性值 <input id="" /> ==> <input />
+    removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
+    removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
+    minifyJS: true,//压缩页面JS
+    minifyCSS: true//压缩页面CSS
+};
+
 var minifyCss = require('gulp-minify-css');
 var uglify = require("gulp-uglify");
 
 // js混淆
 var javascriptObfuscator = require('gulp-javascript-obfuscator');
-// 混淆配置
-var cfg = {
+var obfuscatorConfig = {
     compact: true,
     controlFlowFlattening: true,
     controlFlowFlatteningThreshold: 0.75,
@@ -81,8 +102,8 @@ var cfg = {
 }
 
 // 同步执行
-var gulpSequence = require('gulp-sequence').use(gulp);
-// var runSequence = require('gulp4-run-sequence');
+// var gulpSequence = require('gulp-sequence').use(gulp);
+var runSequence = require('gulp4-run-sequence');
 
 gulp.task('打包html', function () {
     return gulp
@@ -90,21 +111,7 @@ gulp.task('打包html', function () {
             "./build/*.html",
         ])
         .pipe(gulpif('*.html', concat("ok.html")))
-        .pipe(htmlmin({
-            removeComments: true,//清除HTML注释
-            collapseWhitespace: true,//压缩HTML
-            collapseBooleanAttributes: true,//省略布尔属性的值 <input checked="true"/> ==> <input />
-            removeEmptyAttributes: true,//删除所有空格作属性值 <input id="" /> ==> <input />
-            removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
-            removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
-            minifyJS: true,//压缩页面JS
-            minifyCSS: true//压缩页面CSS
-        }))
-        // .pipe(minifyHtml({
-        //     empty: true,
-        //     spare: true,
-        //     quotes: true
-        // }))
+        .pipe(gulpif('*.html', gulpif(options.env === 'production', htmlmin(htmlminConfig))))
         .pipe(gulp.dest("./dist/"))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
@@ -119,7 +126,7 @@ gulp.task('打包css', function () {
             './build/*.css',
         ])
         .pipe(gulpif('*.css', concat("css/ok.css")))
-        .pipe(gulpif('*.css', minifyCss()))
+        .pipe(gulpif('*.css', gulpif(options.env === 'production', minifyCss())))
         .pipe(gulp.dest('./dist/'))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
@@ -135,8 +142,8 @@ gulp.task('打包js', function () {
             './build/*.js',
         ])
         .pipe(gulpif('*.js', concat("js/ok.js")))
-        .pipe(gulpif('*.js', uglify()))
-        // .pipe(gulpif('*.js', javascriptObfuscator(cfg)))
+        .pipe(gulpif('*.js', gulpif(options.env === 'production', uglify())))
+        .pipe(gulpif('*.js', gulpif(options.env === 'production', javascriptObfuscator(obfuscatorConfig))))
         .pipe(gulp.dest('./dist/'))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
@@ -146,11 +153,14 @@ gulp.task('打包js', function () {
         });
 });
 
-gulp.task('default', gulpSequence(
-    '打包html',
-    '打包css',
-    '打包js',
-    function () {
-        console.log('[' + new Date().toLocaleTimeString() + ']', "输出完成！");
-    }
-));
+gulp.task('default', function(callback) {
+    runSequence(
+        '打包html',
+        '打包css',
+        '打包js',
+        function () {
+            console.log('[' + new Date().toLocaleTimeString() + ']', "输出完成！");
+        },
+        callback
+    );
+});
