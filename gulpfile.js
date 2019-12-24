@@ -63,7 +63,9 @@ var htmlminConfig = {
     minifyCSS: true//压缩页面CSS
 };
 
-var minifyCss = require('gulp-minify-css');
+// var minifyCss = require('gulp-minify-css'); // 退休
+var cleanCss = require('gulp-clean-css'); // 推荐
+
 var uglify = require("gulp-uglify");
 
 // js混淆
@@ -110,8 +112,8 @@ gulp.task('打包html', function () {
         .src([
             "./build/*.html",
         ])
-        .pipe(gulpif('*.html', concat("ok.html")))
-        .pipe(gulpif('*.html', gulpif(options.env === 'production', htmlmin(htmlminConfig))))
+        .pipe(concat("ok.html"))
+        .pipe(gulpif(options.env === 'production', htmlmin(htmlminConfig)))
         .pipe(gulp.dest("./dist/"))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
@@ -125,8 +127,8 @@ gulp.task('打包css', function () {
         .src([
             './build/*.css',
         ])
-        .pipe(gulpif('*.css', concat("css/ok.css")))
-        .pipe(gulpif('*.css', gulpif(options.env === 'production', minifyCss())))
+        .pipe(concat("css/ok.css"))
+        .pipe(gulpif(options.env === 'production', cleanCss()))
         .pipe(gulp.dest('./dist/'))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
@@ -141,9 +143,9 @@ gulp.task('打包js', function () {
         .src([
             './build/*.js',
         ])
-        .pipe(gulpif('*.js', concat("js/ok.js")))
-        .pipe(gulpif('*.js', gulpif(options.env === 'production', uglify())))
-        .pipe(gulpif('*.js', gulpif(options.env === 'production', javascriptObfuscator(obfuscatorConfig))))
+        .pipe(concat("js/ok.js"))
+        .pipe(gulpif(options.env === 'production', uglify()))
+        .pipe(gulpif(options.env === 'production', javascriptObfuscator(obfuscatorConfig)))
         .pipe(gulp.dest('./dist/'))
         .on('end', function () {
             console.log('[' + new Date().toLocaleTimeString() + ']', [
