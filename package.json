@@ -13,7 +13,7 @@
     "gulp-javascript-obfuscator": "^1.1.6",
     "gulp-uglify": "^3.0.2",
     "gulp4-run-sequence": "^0.3.3",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.6"
   },
   "devDependencies": {},
   "scripts": {
